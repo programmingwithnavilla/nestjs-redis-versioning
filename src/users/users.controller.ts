@@ -20,7 +20,10 @@ export class UsersController {
     if (!parsed.success) throw new BadRequestException(parsed.error.format());
     return this.usersService.create(parsed.data);
   }
-
+  @Get()
+  async findAll() {
+    return this.usersService.findAll();
+  }
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return this.usersService.findOne(+id);
