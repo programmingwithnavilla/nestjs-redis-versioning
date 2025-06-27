@@ -8,12 +8,12 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
-import { UserService } from './user.service';
+import { UsersService } from './users.service';
 import { CreateUserSchema } from './dto/create-user.dto';
 
 @Controller('users')
-export class UserController {
-  constructor(private readonly usersService: UserService) {}
+export class UsersController {
+  constructor(private readonly usersService: UsersService) {}
   @Post()
   async create(@Body() body: any) {
     const parsed = CreateUserSchema.safeParse(body);
