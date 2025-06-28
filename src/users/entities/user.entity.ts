@@ -1,6 +1,6 @@
-import { BaseEntity } from 'src/common/entities/base.entity';
+import { IBaseEntity } from 'src/common/entities/base.entity';
 
-export class UserEntity extends BaseEntity {
+export class UserEntity implements IBaseEntity {
   id: number;
   name: string;
   email: string;
@@ -10,7 +10,6 @@ export class UserEntity extends BaseEntity {
   archivedAt?: Date | null;
 
   constructor(partial: Partial<UserEntity>) {
-    super();
     Object.assign(this, partial);
   }
 }
