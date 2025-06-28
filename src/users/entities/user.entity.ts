@@ -7,7 +7,7 @@ export class UserEntity extends BaseEntity {
   password: string;
   createdAt: Date;
   updatedAt: Date;
-  deletedAt?: Date | null;
+  archivedAt?: Date | null;
 
   constructor(partial: Partial<UserEntity>) {
     super();
