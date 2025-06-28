@@ -67,3 +67,41 @@ npx prisma generate
 
 # Start development server
 npm run start:dev
+
+## ✅ API Endpoints
+
+| Method | Endpoint       | Description            |
+|--------|----------------|------------------------|
+| GET    | `/users`       | Get all users          |
+| GET    | `/users/:id`   | Get user by ID         |
+| POST   | `/users`       | Create new user        |
+| PUT    | `/users/:id`   | Update existing user   |
+| DELETE | `/users/:id`   | Delete user            |
+
+---
+
+## 🧪 Testing the Cache
+
+- `GET /users` → First request (hits DB and caches result)  
+- `POST /users` → Creates a new user and **increments version**  
+- `GET /users` → New version = new cache key → fresh DB fetch and cache again  
+- `GET /users/:id` → Caches individual user with a versioned key  
+- `PUT /users/:id` / `DELETE /users/:id` → Increments both list and user-specific versions
+
+✅ **No cache is manually deleted.**  
+🚀 **Old cache is ignored due to versioning and naturally expires.**
+
+---
+
+## 📖 License
+
+**MIT** — Free to use, modify, and distribute.
+
+---
+
+## 📬 Feedback / Contributions
+
+Pull requests and suggestions are welcome!  
+Let’s improve this service together.
+
+---
