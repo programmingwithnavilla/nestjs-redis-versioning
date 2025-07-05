@@ -1,72 +1,18 @@
-# 🧠 Users Service — NestJS + Redis + Prisma
+# 👥 Users Service – NestJS + Redis + Prisma
 
-A production-ready Users service built with **NestJS**, **Redis** (for versioned caching), and **Prisma ORM**.
+A scalable and high-performance user service built with **NestJS**, **Prisma**, and **Redis-based versioned caching**.
 
 ---
 
 ## 🚀 Features
 
-- ✅ CRUD operations for users
-- ✅ Redis caching with smart versioning
-- ✅ Atomic cache version updates using `INCR`
-- ✅ No cache deletion — old versions expire naturally
-- ✅ Clean, scalable architecture
+- 🔧 Clean architecture with Repository & Service layers
+- ⚡ **High-speed Redis caching** with version control
+- 🧪 Easy to test and extend
+- 📦 Built with **Prisma** ORM and **TypeScript**
+- 🛡️ Type-safe DTOs and clean code structure
 
 ---
-
-## 📦 Tech Stack
-
-- **NestJS** – Modular TypeScript framework
-- **Redis** – Caching layer with versioning
-- **Prisma** – Type-safe database client
-- **TypeScript** – Full typing for safety and clarity
-
----
-
-## 📁 Project Structure
-
-src/
-├── users/
-│ ├── users.service.ts # Business logic and caching
-│ ├── users.controller.ts # HTTP layer
-│ ├── users.repository.ts # Prisma data access
-│ ├── dto/ # DTOs for input validation
-├── cache/
-│ └── redis.service.ts # Redis abstraction
-
----
-
-## 🧠 Caching Strategy
-
-Caching is done via Redis and **versioned** per resource:
-
-- `users:version` → version of the full users list
-- `user:version:{id}` → version of a single user
-- Cache keys include version to prevent stale reads
-- No manual deletion: versions are bumped, and old cache expires via TTL
-
-### 🔑 Example Redis Keys
-
-| Redis Key               | Description                     |
-|------------------------|---------------------------------|
-| `users:version`        | Global version for user list    |
-| `users:cache:v3`       | Cached users list (version 3)   |
-| `user:version:42`      | Version for user with ID = 42   |
-| `user:cache:42-v2`     | Cached user 42 (version 2)      |
-
----
-
-## 🛠️ Setup
-
-```bash
-# Install dependencies
-npm install
-
-# Generate Prisma client
-npx prisma generate
-
-# Start development server
-npm run start:dev
 
 ## ✅ API Endpoints
 
@@ -74,34 +20,49 @@ npm run start:dev
 |--------|----------------|------------------------|
 | GET    | `/users`       | Get all users          |
 | GET    | `/users/:id`   | Get user by ID         |
-| POST   | `/users`       | Create new user        |
+| POST   | `/users`       | Create a new user      |
 | PUT    | `/users/:id`   | Update existing user   |
 | DELETE | `/users/:id`   | Delete user            |
 
 ---
 
+## 🧠 Redis Caching Strategy
+
+This service uses **versioned Redis caching** to ensure high performance and consistency, without manual cache invalidation.
+
+### 🔄 Versioned Cache Keys
+
+- List cache key: `users-v:{version}`
+- Single user cache key: `user:{id}-v:{version}`
+
+### 🔧 Versioning Logic
+
+- `GET /users` → Reads from `users-v:{version}`
+- `POST /users` → Creates user, then `INCR users:version`
+- `PUT /users/:id` → Updates user, bumps `users:version` and `user:{id}:version`
+- `DELETE /users/:id` → Deletes user, bumps versions
+
+This ensures that any mutation (create/update/delete) results in a new cache version, **without needing to delete keys**.
+
+### ⏳ Expiration
+
+Cached data is automatically set with an expiration time (e.g., 1 hour), keeping memory usage optimized.
+
+---
+
 ## 🧪 Testing the Cache
 
-- `GET /users` → First request (hits DB and caches result)  
-- `POST /users` → Creates a new user and **increments version**  
-- `GET /users` → New version = new cache key → fresh DB fetch and cache again  
-- `GET /users/:id` → Caches individual user with a versioned key  
-- `PUT /users/:id` / `DELETE /users/:id` → Increments both list and user-specific versions
+```bash
+# 1. Initial request - DB hit + cache set
+GET /users
 
-✅ **No cache is manually deleted.**  
-🚀 **Old cache is ignored due to versioning and naturally expires.**
+# 2. Create user - version incremented
+POST /users
 
----
+# 3. Request again - new version forces DB hit and new cache set
+GET /users
 
-## 📖 License
-
-**MIT** — Free to use, modify, and distribute.
-
----
-
-## 📬 Feedback / Contributions
-
-Pull requests and suggestions are welcome!  
-Let’s improve this service together.
-
----
+# 4. Same logic applies for:
+GET /users/:id
+PUT /users/:id
+DELETE /users/:id
